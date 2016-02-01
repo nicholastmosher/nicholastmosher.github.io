@@ -67,8 +67,8 @@ much in Fusion as I needed to generate cutpaths for the ShopBot.
 
 <iframe src="https://myhub.autodesk360.com/ue29ffab2/shares/public/SHabee1QT1a327cf2b7a6cb3617bf692b2cb?mode=embed" width="800" height="600" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"  frameborder="0"></iframe>
 
-Be warned, Autodesk's web views depend on WebGL, which I have found is not
-working on the latest versions of Chrome or Firefox in Ubuntu.
+Note: The rendering above is based on WebGL which can be finicky on some
+systems, so I apologize in advance if you can't view it.
 
 ## Fabrication
 
