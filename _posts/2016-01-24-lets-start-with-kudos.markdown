@@ -4,6 +4,7 @@ title: "Let's start with Kudos"
 date: 2016-01-24 11:56
 permalink: Kudos
 ---
+
 Well, here we are. It only took me until 2016 to make my very own website, and
 there's a lot of catching up to do. I want to start by talking about Kudos, a
 robot that I built way back in the summer of 2014. Kudos was born from the
