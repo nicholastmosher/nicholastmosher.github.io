@@ -1,0 +1,126 @@
+---
+layout: post
+title: "My Obsession with Vim and Tmux"
+date: 2016-02-26 20:00
+permalink: Dotfiles
+---
+
+Lately, I've undergone a paradoxical spree of spending hours customizing my vim
+and tmux configurations - an exercise that's usually intended to save time.
+However, I've found that having a personalized terminal environment makes it
+much more enjoyable to use, plus it's given me a chance to better understand
+command-line based technologies. Let's jump in and take a look at some of the
+highlights of my current
+[configurations!](https://github.com/nicholastmosher/dotfiles)
+
+## Vim
+
+My base configuration for vim comes straight from my friend Harlan's
+[vimrc](https://github.com/harlanhaskins/harlan-vimrc), and most of the changes
+I've made to it relate to its integration with tmux. For example, I use
+[this plugin](https://github.com/christoomey/vim-tmux-navigator) to navigate
+between vim and tmux windows seamlessly using hotkeys C-h, C-j, C-k, and C-l.
+There are instructions at that link to set it up, but I'll restate them briefly
+here:
+
+In `.tmux.conf`:
+
+	# Act like vim
+	is_vim='echo "#{pane_current_command}" | grep -iqE "(^|\/)g?(view|n?vim?x?)(diff)?$"'
+	bind -n C-h if-shell "$is_vim" "send-keys C-h" "select-pane -L"
+	bind -n C-j if-shell "$is_vim" "send-keys c-j" "select-pane -D"
+	bind -n C-k if-shell "$is_vim" "send-keys c-k" "select-pane -U"
+	bind -n C-l if-shell "$is_vim" "send-keys c-l" "select-pane -R"
+	bind -n C-\ if-shell "$is_vim" "send-keys c-\\" "select-pane -l"
+
+In `.vimrc`:
+
+	" Install vim-tmux-navigator plugin
+	Plugin 'christoomey/vim-tmux-navigator'
+
+	" Remap window navigation
+	nnoremap <C-J> <C-W><C-J>
+	nnoremap <C-K> <C-W><C-K>
+	nnoremap <C-L> <C-W><C-L>
+	nnoremap <C-H> <C-W><C-H>
+
+After adding that to the `.vimrc`, open vim and run `:PluginInstall`.
+
+![A screenshot of vim and tmux configurations, for a webpage about
+vim and tmux configurations, whilest ediing said webpage about
+vim and tmux configurations? Meta.](assets/vim-tmux.jpg)
+
+Oh look, you're getting a little sneak peak at the future!
+
+### Vim and Ctags
+
+One of my favorite plugins for vim is easytags, which extends vim's built-in
+support of the program "exuberant ctags". Ctags is a program that will
+index a file or directory searching for unique identifiers from a variety of
+programming languages. Essentially, it discovers declarations for variables and
+functions and records on what line and in which file they appear. Ctags then
+outputs a "tags" file, which vim can use as a lookup table for finding
+declarations for various program elements. If vim detects a "tags" file in the
+current working directory, then you can highlight any variable or function name
+in a program and press ctrl+] to jump to it's declaration, and ctrl+t to jump
+back to where you were. To me, this fills in one of the largest gaps that put
+vim at a disadvantage behind many pouplar IDEs.
+
+## Tmux
+
+When I started using tmux, one of the things I marveled at was the ability to
+detach from live sessions and reattach to them later. I saw this as a great
+opportuinity to run processes on remote machines and leave them spinning until
+I came back. However, if I just relied on launching tmux from the command line
+like normal, then I risked starting a long-running process before remembering
+to hop into a tmux session. With that in mind, I wanted a configuration that
+would automatically place me in a tmux session whenever I opened a shell. That
+much was as easy as placing an `exec tmux` command in the .bash_profile (or
+equivalent for each shell). But that wasn't enough. I found that if I closed
+the session without explicitly `exit`ing, the tmux session continues running
+(which is exactly the behavior I wanted). However, if I exited this way and
+logged on a few days later, it puts me into a new session, while the old
+session is <i>still</i> running. I saw that this puts me at risk of leaving
+rampant tmux processes all over, and I wanted none of that. So instead, I came
+up with a way that my shell would either launch a new tmux session if none was
+running, or attach me to one if it was running. This way I can avoid leaving
+unused sessions dangling while still achieving the behavior I wanted. This
+works well on a local machine, but it's absolutely fantastic for remote ones!
+If I ssh into a server, I can use `ssh $HOST -t tmux a` in order to attach my
+local tmux session to the remote one. By doing this, I do have a layered tmux
+interface, but I can still rely on entering the same tmux session on the remote
+machine at every login. Here's the quick version of how to set it up:
+
+In your shell's profile configuration (for example `~/.bash_profile`)
+
+	tmux attach; clear
+
+In your `~/.tmux.conf`:
+
+	# Place this at the end of the file
+	new-session
+
+This works because whenever you launch a new shell session, your
+`.bash_profile` will run, which then executes `tmux attach` (note: the clear
+after that is just to erase tmux's recursive warning). When `tmux attach` runs,
+tmux will either 1) attach to an existing session if one exists, or 2) there is
+no existing session so `.tmux.conf` will be executed, which in turn tells tmux
+to launch a new-session, which it can then attach to. That's pretty neat!
+
+# That's it for now
+
+Right now that's about all I've got that I think is worth fanning about. In the
+future I'm likely to find new plugins or tweaks to improve my workflow, so I
+might update this page or even write a new one in the future if there's
+something truly groundbreaking. In the meantime, feel free to use and adopt
+my configurations to your own needs. As a parting word, I'll put my one-liner
+install script here for if you want to install everything I've just described.
+I'm not promising that this won't break things, but there are a few tentative
+safeguards that should back up any previous files that might already exist.
+Still, I'm not responsible if this breaks something of yours, and only do this
+if you trust me.
+
+	git clone https://github.com/nicholastmosher/dotfiles.git ~/.dotfiles; ~/.dotfiles/install.sh
+
+If it does happen to break things, shoot me an email and I might be able to
+help fix it. Happy hacking!
