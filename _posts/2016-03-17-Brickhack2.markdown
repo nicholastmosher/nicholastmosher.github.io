@@ -1,0 +1,149 @@
+---
+layout: post
+title: "Brickhack"
+date: 2016-03-17 13:05
+permalink: Brickhack
+---
+
+A couple weeks back, I went to [Brickhack 2](https://brickhack.io/),
+CodeRIT's second annual MLH hackathon.
+I had a great time with my team and with the project we tackled, so I wanted
+to write a little about it for memory's sake and to show off what we
+accomplished during the event.
+
+## The Team
+
+In the few weeks leading up to the event, I'd known that I was going to attend,
+but I hadn't figured out an idea or found a team. Luckily, CodeRIT hosted a
+mixer for team scouting and brainstorming, which is where I met Andrew
+Wetmore and Kevin Kong, who became my teammates. Funny enough, I'd actually
+met Andrew earlier that same day on a totally unrelated note, when he came to
+Computer Science House to apply as an intro member. Anyway, we found that we
+had a nice mix of skills - Andrew was a Game Design and Development major who
+had experience with using Unreal Engine and general gamemaking practices, and
+Kevin and I both had a solid working knowledge of C++.
+
+## The Project
+
+After brainstorming for awhile, we got talking about how cool it would be to
+make a game with virtual reality enabled. Andrew mentioned that adding VR to
+a game built with Unreal was nearly trivial, so we started focusing on ideas
+geared towards that end. I happened to remember a project built by my friend
+[Roxy Meskell](https://github.com/roxymeskell/MDMazeGeneration) in which she
+built a maze generation algorithm that operated in higher dimensions - up to 16.
+I brought the idea up, and we got excited by the possibility of implementing
+a multi-dimensional maze using VR, so we decided to pursue it. Over the next
+week leading up to the hackathon, we met a few times to refine our idea and
+identify exactly what we wanted our end goal to be. We recognized the
+difficulty of the project, so although we had wild ideas about how the game
+could work in an ideal scenario, we cut down our objectives to something we
+thought was more reasonable - to simply generate the mazes and be able to
+navigate through the VR world.
+
+### Implementation Details
+
+While we brainstormed, we identified several of the different aspects that
+would be needed to achieve a working game. We decided that Andrew could work
+on the game environment - setting up the Unreal Engine project, creating the
+virtual world, and implementing player interaction. Kevin and I took the maze
+generation challenge, which we decided to develop in C++. Choosing C++ was a
+good choice because we'd both had prior experience with it and it was capable
+of being imported into an Unreal project as program logic. For the maze
+generation algorithm, we decided to take the same approach that Roxy had, which
+was to adapt [Eller's Algorithm](http://weblog.jamisbuck.org/2010/12/29/maze-generation-eller-s-algorithm)
+for higher dimensions. I'd reached out to Roxy by that point, and she told me
+about how her implementation supported multiple dimensions. The answer lies in
+the nature of Eller's Algorithm itself. In the algorithm, a maze is generated
+with a fixed "row" width (i.e. fixed number of columns) and then grows
+downward. Cells in the maze are categorized into "sets", which determine which
+cells are connected and which ones are divided by walls. A more complete
+explanation of the traditional 2D approach is available at the link above, but
+this is where higher order dimensions come into play.
+
+So far, we've identified two important characteristics, but let's re-imagine
+them in a more generalized form. The first characteristic was having a fixed
+width and growing by one downward. We can see two dimensions in play at this
+point, the width (let's call it `x`), and the direction of expansion (let's
+call it `y`). We can see that at each iteration of expansion (i.e. every time
+we "add a row"), we're really just expanding the maze by one `x` set in the
+`y` direction. The next characteristic is that the presence of walls between
+two cells is determined only by the "sets" of those two cells. If they share
+a set (i.e. they have the same number), they are connected, otherwise they are
+divided by a wall. However, the idea of a set, a collection of objects, doesn't
+care about whether a cell belongs to a line of cells, or to a plane of cells,
+or to a cube of cells.
+
+Now we can put this all together. The original Eller's algorithm repeatedly
+takes two rows of the same width and merges across them, randomly connecting
+cells that share an index within their individual rows. The "rows" can just be
+replaced with a generic data structure that is a collection of cells. This data
+structure can be filled with one row of cells, or it can be filled with planes
+of cells, or cells arranged in higher-dimension shapes such as cubes and
+tessaracts. When generating the maze, the algorithm takes two of these data
+structures of the same size and randomly connects cells in corresponding
+indeces of each "shape". So if we were trying to merge two 2x2 planes
+(which results in a 2x2x2 cube), the algorithm would operate between the
+following indeces:
+
+	(x, y, plane 0)                         (x, y, plane 1)
+	(0, 0, 0) <-- randomly connect with --> (0, 0, 1)
+	(1, 0, 0) <-- randomly connect with --> (1, 0, 1)
+	(0, 1, 0) <-- randomly connect with --> (0, 1, 1)
+	(1, 1, 0) <-- randomly connect with --> (1, 1, 1)
+
+Since we've now generalized this pattern away from absolute shapes such as
+lines, planes, and cubes, we can simply apply it with new numbers for the
+number of dimensions we want our maze to be and the size of each dimension.
+
+## At the Hackathon
+
+A lot of this problem solving was done in a meeting in advance of the
+hackathon, even though we didn't write any code until the event started. Even
+for all of our planning, we still had to spend the first two hours identifying
+exactly how the two halves of the project - the game engine and the backend -
+would interface with one another. We drew up a clear set of method signatures
+and defined exactly what data Andrew needed to be able to query and what
+parameters he would provide in order to identify the data he needed. After
+that point, I can't speak much for how Andrew went about implementing the game
+side of the project, just that whatever he did seemed like pure wizardry.
+
+On the other side of things, Kevin and I must have spent at least 8 to 12 hours
+of the hackathon just setting up the data structure for the maze. We had to
+create something that was flexible enough to store cell data in a world that
+could vary in number and size of dimensions. Since we were using C++, we were
+thankfully able to separate the organization of the cells from the data that
+the cells themselves contained, meaning that if we needed to change some member
+data of a cell we didn't have to rewrite our entire array setup. Originally,
+we had the cells keep a very sparse amount of data about themselves. Namely,
+they each had an array of boolean flags that indicated whether there was a wall
+on either side of it in each dimension. Since you can move in two directions
+in any dimensions, the indeces of the wall flags looked a bit like this:
+
+	[0-, 0+, 1-, 1+, 2-, 2+, ...]
+
+Where `0-` would indicate a wall behind us on dimension 0, and `0+` would be
+a wall in front of us in dimension 0, and so on for the other dimenisions.
+
+I think that by the time we reached the maze generation portion of the project,
+it must have been past midnight (having started at 1 pm). We spent a lot of
+time analyzing Roxy's code, and one of the things that we noticed was that
+since her implentation used C#, there was a lot of overhead that we would have
+to do that involved manipulation of sets and the like, which were provided by
+native functions in the C# implementation. Some of these capabilities included
+the ability to "merge" two sets (we were using C++ vectors), renumber each set,
+etc. We had to think of the generalized operations we would need to perform on
+the sets in order to do the modified Eller's algorithm successfully.
+
+## Project Conclusion
+
+Though we went into the hackathon with a solid plan and started off at full
+steam, I think that the difficulty of the project was too much for the three of
+us in 24 hours. We made a lot of progress on both the data backend and game
+frontend, which was a blast and took a lot of intense problem solving, but in
+the end I don't think we had the endurance to maintain the level of focus we
+would have needed to complete the project in time. If you want to check out
+the progress we did make, you can find it on GitHub
+[here](https://github.com/nicholastmosher/HighDMazes). If you find this project
+overwhelmingly interesting and would like to talk about it, feel free to email
+me about it or find me some other way - I'd be happy to just chat about it or
+perhaps to hand it off if somebody feels really ambitious about it.
