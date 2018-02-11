@@ -1,17 +1,17 @@
 ---
 layout: post
-title: "My Obsession with Vim and Tmux"
+title: "Dotfiles"
 date: 2016-02-26 20:00
 permalink: Dotfiles
 ---
 
-Lately, I've undergone a paradoxical spree of spending hours customizing my vim
-and tmux configurations - an exercise that's usually intended to save time.
+Lately, I've undergone a spree of spending hours customizing my dotfile
+configurations - an exercise that's usually intended to save time.
 However, I've found that having a personalized terminal environment makes it
 much more enjoyable to use, plus it's given me a chance to better understand
 command-line based technologies. Let's jump in and take a look at some of the
-highlights of my current
-[configurations!](https://github.com/nicholastmosher/dotfiles)
+highlights of my
+[current configurations!](https://github.com/nicholastmosher/dotfiles)
 
 ## Vim
 
@@ -93,12 +93,16 @@ machine at every login. Here's the quick version of how to set it up:
 
 In your shell's profile configuration (for example `~/.bash_profile`)
 
-	tmux attach; clear
+```
+tmux attach; clear
+```
 
 In your `~/.tmux.conf`:
 
-	# Place this at the end of the file
-	new-session
+```
+# Place this at the end of the file
+new-session
+```
 
 This works because whenever you launch a new shell session, your
 `.bash_profile` will run, which then executes `tmux attach` (note: the clear
@@ -120,7 +124,9 @@ safeguards that should back up any previous files that might already exist.
 Still, I'm not responsible if this breaks something of yours, and only do this
 if you trust me.
 
-	git clone https://github.com/nicholastmosher/dotfiles.git ~/.dotfiles; ~/.dotfiles/install.sh
+```
+git clone https://github.com/nicholastmosher/dotfiles.git ~/.dotfiles; ~/.dotfiles/install.sh
+```
 
 If it does happen to break things, shoot me an email and I might be able to
 help fix it. Happy hacking!

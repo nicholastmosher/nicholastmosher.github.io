@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Apple's 2016 iOS App Challenge at RIT"
+title: "iOS App Challenge at RIT"
 date: 2016-02-03 8:00
 permalink: Apple-Hackathon
 ---
